@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Leapad Code 论坛 — C++ & Python 技术社区</title>
+<style>
+:root{
+  --bg:#0f1117;--surface:#1a1d27;--card:#22263a;--border:#2d324a;
+  --text:#e4e6ef;--text-secondary:#9ca3b8;--accent:#6366f1;
+  --accent-hover:#818cf8;--accent-glow:rgba(99,102,241,.15);
+  --danger:#ef4444;--danger-hover:#dc2626;--danger-glow:rgba(239,68,68,.12);
+  --input-bg:#161923;--toast-bg:#1f2937;--radius:14px;
+  --transition:all .3s cubic-bezier(.215,.609,.355,1);
+}
+body.light{
+  --bg:#f3f4f8;--surface:#fff;--card:#f0f1f6;--border:#d1d5db;
+  --text:#1f2937;--text-secondary:#6b7280;--accent:#4f46e5;
+  --accent-hover:#6366f1;--accent-glow:rgba(79,70,229,.08);
+  --danger:#dc2626;--danger-hover:#b91c1c;--danger-glow:rgba(220,38,38,.09);
+  --input-bg:#fff;--toast-bg:#fff;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;min-height:100vh;transition:background .4s,color .4s}
+
+nav{display:flex;align-items:center;justify-content:space-between;padding:0 44px;height:64px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:900}
+.nav-logo{font-size:1.48rem;font-weight:780;background:linear-gradient(135deg,#6366f1,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.nav-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.theme-btn,.tutorial-btn{background:transparent;border:1px solid var(--border);color:var(--text-secondary);padding:7px 14px;border-radius:36px;cursor:pointer;font-size:.887rem;transition:var(--transition)}
+.theme-btn:hover,.tutorial-btn:hover{background:var(--accent-glow);border-color:var(--accent);color:var(--accent)}
+.user-info{display:flex;align-items:center;gap:10px;color:var(--text-secondary);font-size:.907rem;cursor:pointer}
+.user-info .username-display{font-weight:600;color:var(--accent);border-bottom:1px dashed var(--accent)}
+.user-info .username-display:hover{color:var(--accent-hover);border-bottom-color:var(--accent-hover)}
+
+.hero{text-align:center;padding:50px 24px 31px;max-width:700px;margin:0 auto}
+.hero h1{font-size:2.43rem;font-weight:690;letter-spacing:-.034em;margin-bottom:8px}
+.hero p{color:var(--text-secondary);font-size:1.01rem}
+.filter-bar{display:flex;justify-content:center;gap:8px;padding:0 24px 20px;flex-wrap:wrap}
+.filter-btn{background:transparent;border:1px solid var(--border);color:var(--text-secondary);padding:5px 18px;border-radius:34px;cursor:pointer;font-size:.838rem;transition:var(--transition)}
+.filter-btn.active,.filter-btn:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+.posts-container{max-width:800px;margin:0 auto 57px;padding:0 24px;min-height:200px}
+.empty-state{text-align:center;padding:71px 20px 51px;color:var(--text-secondary)}
+.empty-state .big-icon{font-size:3.67rem;margin-bottom:12px}
+.empty-state h3{font-size:1.347rem;margin-bottom:6px;color:var(--text)}
+.empty-state .start-btn{display:inline-block;margin-top:16px;background:var(--accent);color:#fff;border:none;padding:10px 32px;border-radius:38px;font-weight:568;cursor:pointer}
+.empty-state .start-btn:hover{background:var(--accent-hover)}
+.post-item{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px 26px;margin-bottom:13px;transition:var(--transition)}
+.post-item:hover{border-color:var(--accent);transform:translateY(-2px)}
+.post-item .post-header{display:flex;align-items:center;gap:9px;margin-bottom:5px;flex-wrap:wrap}
+.post-item .tag{background:var(--accent-glow);color:var(--accent);padding:2px 9px;border-radius:26px;font-size:.738rem;font-weight:518}
+.post-item h4{font-size:1.045rem;font-weight:618;margin-bottom:3px}
+.post-item .preview{color:var(--text-secondary);font-size:.877rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:9px;white-space:pre-wrap}
+.post-item .meta{display:flex;align-items:center;gap:15px;color:var(--text-secondary);font-size:.777rem}
+.post-item .post-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:11px;border-top:1px solid var(--border);padding-top:11px;flex-wrap:wrap}
+.post-item .post-actions button{padding:4px 16px;border-radius:28px;font-size:.837rem;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--text-secondary);transition:var(--transition)}
+.post-item .post-actions button:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-glow)}
+.post-item .post-actions .open-btn{background:var(--accent);color:#fff;border-color:var(--accent)}
+.post-item .post-actions .open-btn:hover{background:var(--accent-hover)}
+.post-item .post-actions .delete-btn{color:var(--danger);border-color:transparent}
+.post-item .post-actions .delete-btn:hover{background:var(--danger-glow);border-color:var(--danger);color:var(--danger)}
+
+.fab{position:fixed;bottom:34px;right:39px;z-index:870;width:55px;height:55px;border-radius:47%;background:var(--accent);color:#fff;border:none;font-size:1.933rem;cursor:pointer;box-shadow:0 8px 28px rgba(99,102,241,.325);transition:var(--transition);display:flex;align-items:center;justify-content:center}
+.fab:hover{background:var(--accent-hover);transform:scale(1.038) rotate(90deg)}
+
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.605);backdrop-filter:blur(6px);z-index:985;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.open{display:flex}
+.modal-content{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:30px 34px;max-width:500px;width:100%;box-shadow:0 20px 56px rgba(0,0,0,.475);position:relative;animation:slideUp .265s ease}
+@keyframes slideUp{from{transform:translateY(24px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-content h2{margin-bottom:13px;font-size:1.337rem}
+.modal-content .close-modal{position:absolute;top:12px;right:18px;background:none;border:none;color:var(--text-secondary);font-size:1.527rem;cursor:pointer;transition:var(--transition)}
+.modal-content .close-modal:hover{color:var(--text);transform:rotate(90deg)}
+.modal-content input,.modal-content select,.modal-content textarea{width:100%;padding:9px 12px;margin-bottom:12px;background:var(--input-bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:.918rem;outline:none;transition:var(--transition);font-family:inherit}
+.modal-content input:focus,.modal-content select:focus,.modal-content textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
+.modal-content textarea{min-height:118px;resize:vertical}
+.modal-content .btn-primary{width:100%;padding:10px;background:var(--accent);color:#fff;border:none;border-radius:10px;font-weight:572;font-size:.937rem;cursor:pointer;transition:var(--transition)}
+.modal-content .btn-primary:hover{background:var(--accent-hover)}
+.modal-content .btn-secondary{width:100%;padding:10px;background:transparent;border:1px solid var(--border);color:var(--text-secondary);border-radius:10px;font-weight:542;font-size:.927rem;cursor:pointer;transition:var(--transition);margin-top:6px}
+.modal-content .btn-secondary:hover{border-color:var(--accent);color:var(--accent)}
+.modal-content .warning-text{color:#f59e0b;font-size:.817rem;margin-bottom:12px;padding:8px 12px;background:rgba(245,158,11,.082);border-radius:8px;border-left:3px solid #f59e0b}
+.modal-content .tutorial-steps{list-style:none;padding:0;margin-bottom:17px}
+.modal-content .tutorial-steps li{padding:8px 0;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:10px;font-size:.908rem;line-height:1.445}
+.modal-content .tutorial-steps li:last-child{border-bottom:none}
+.modal-content .tutorial-steps .step-num{background:var(--accent);color:#fff;border-radius:50%;width:23px;height:23px;display:flex;align-items:center;justify-content:center;font-size:.727rem;font-weight:658;flex-shrink:0;margin-top:1px}
+.modal-content .skip-tutorial-row{display:flex;align-items:center;justify-content:space-between;margin-top:10px;gap:12px}
+.modal-content .skip-tutorial-row label{display:flex;align-items:center;gap:6px;font-size:.842rem;color:var(--text-secondary);cursor:pointer}
+.modal-content .skip-tutorial-row label input{width:16px;height:16px;accent-color:var(--accent);cursor:pointer;margin:0}
+
+.login-modal .modal-content{max-width:410px;text-align:center}
+.login-modal .login-logo{font-size:2.167rem;font-weight:778;background:linear-gradient(135deg,#6366f1,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:3px}
+.login-modal .login-subtitle{color:var(--text-secondary);font-size:.883rem;margin-bottom:18px}
+.login-modal .login-input-wrapper{position:relative}
+.login-modal .login-input-wrapper input{padding-left:41px;font-size:.995rem}
+.login-modal .login-input-wrapper .input-icon{position:absolute;left:13px;top:50%;transform:translateY(-57%);font-size:1.065rem;color:var(--text-secondary)}
+.login-modal .login-hint{font-size:.772rem;color:var(--text-secondary);margin-top:-5px;margin-bottom:10px;text-align:left}
+
+.confirm-delete .modal-content{max-width:395px;text-align:center}
+.confirm-delete .modal-content p{font-size:.972rem;margin-bottom:18px;color:var(--text-secondary)}
+.confirm-delete .btn-group{display:flex;gap:10px}
+.confirm-delete .btn-group .btn-danger{flex:1;padding:10px;background:var(--danger);color:#fff;border:none;border-radius:10px;font-weight:573;font-size:.932rem;cursor:pointer;transition:var(--transition)}
+.confirm-delete .btn-group .btn-danger:hover{background:var(--danger-hover)}
+.confirm-delete .btn-group .btn-cancel{flex:1;padding:10px;background:transparent;border:1px solid var(--border);color:var(--text-secondary);border-radius:10px;font-weight:543;font-size:.922rem;cursor:pointer;transition:var(--transition)}
+.confirm-delete .btn-group .btn-cancel:hover{border-color:var(--accent);color:var(--accent)}
+
+#detailModalOverlay{display:none;align-items:center;justify-content:center;padding:0;background:rgba(0,0,0,.715)}
+#detailModalOverlay.open{display:flex}
+#detailModal{width:100%;height:100%;max-width:none;max-height:none;border-radius:0;border:none;border-left:1px solid var(--border);animation:slideFromRight .315s cubic-bezier(.215,.609,.355,1);display:flex;flex-direction:column}
+@keyframes slideFromRight{from{transform:translateX(58px);opacity:0}to{transform:translateX(0);opacity:1}}
+#detailModal .detail-head{padding:26px 34px 16px;border-bottom:1px solid var(--border);flex-shrink:0;position:relative}
+#detailModal .detail-head .close-detail{position:absolute;top:16px;right:22px;background:none;border:none;color:var(--text-secondary);font-size:1.665rem;cursor:pointer;transition:var(--transition)}
+#detailModal .detail-head .close-detail:hover{color:var(--text);transform:rotate(90deg)}
+#detailModal .detail-tag{background:var(--accent-glow);color:var(--accent);padding:2px 10px;border-radius:26px;font-size:.742rem;font-weight:517}
+#detailModal .detail-title{font-size:1.528rem;font-weight:652;margin:10px 0 8px;line-height:1.342}
+#detailModal .detail-meta{color:var(--text-secondary);font-size:.822rem;display:flex;gap:16px;flex-wrap:wrap}
+#detailModal .detail-body{padding:20px 34px;overflow-y:auto;flex:1;min-height:0}
+#detailModal .detail-content{white-space:pre-wrap;font-size:.952rem;line-height:1.682;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 21px;margin-bottom:22px}
+#detailModal .detail-body h3.comments-title{font-size:1.072rem;font-weight:592;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+#detailModal .comment-list{display:flex;flex-direction:column;gap:10px}
+.comment-item{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:13px 17px;transition:var(--transition)}
+.comment-item:hover{border-color:var(--accent)}
+.comment-item .c-head{display:flex;align-items:center;gap:9px;margin-bottom:6px}
+.comment-item .c-author{font-weight:598;color:var(--accent);font-size:.862rem}
+.comment-item .c-time{color:var(--text-secondary);font-size:.732rem}
+.comment-item .c-body{font-size:.902rem;white-space:pre-wrap;line-height:1.582}
+.comment-item .c-empty{color:var(--text-secondary);font-size:.872rem;padding:8px 0}
+#detailModal .detail-reply{flex-shrink:0;padding:16px 34px 22px;border-top:1px solid var(--border);background:var(--surface);display:flex;gap:10px;align-items:flex-start}
+#detailModal .detail-reply textarea{flex:1;min-height:53px;max-height:141px;resize:vertical;margin-bottom:0}
+#detailModal .detail-reply button{flex-shrink:0;width:auto;padding:11px 26px;margin-top:0}
+
+.toast-container{position:fixed;top:76px;right:20px;z-index:1095;display:flex;flex-direction:column;gap:7px;pointer-events:none}
+.toast{background:var(--toast-bg);border:1px solid var(--border);padding:12px 19px;border-radius:10px;box-shadow:0 8px 28px rgba(0,0,0,.182);font-size:.891rem;animation:slideInRight .282s ease;max-width:308px}
+@keyframes slideInRight{from{transform:translateX(73px);opacity:0}to{transform:translateX(0);opacity:1}}
+.toast.success{border-left:4px solid #22c55e}
+.toast.error{border-left:4px solid #ef4444}
+.toast.info{border-left:4px solid #6366f1}
+
+@media(max-width:650px){
+  nav{padding:0 14px}
+  .hero h1{font-size:1.637rem}
+  .modal-content{padding:22px 18px}
+  .post-item{padding:15px 17px}
+  .fab{bottom:20px;right:20px;width:50px;height:50px;font-size:1.368rem}
+  #detailModal .detail-head,#detailModal .detail-body,#detailModal .detail-reply{padding-left:18px;padding-right:18px}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">Leapad Code</div>
+  <div class="nav-actions">
+    <button class="theme-btn" id="themeToggle">🌙 深色</button>
+    <button class="tutorial-btn" id="manualTutorialBtn">📖 新手教程</button>
+    <div class="user-info" id="userInfo">
+      <span>👤 <span class="username-display" id="currentUsername"></span></span>
+    </div>
+  </div>
+</nav>
+
+<section class="hero">
+  <h1>欢迎来到 Leapad Code</h1>
+  <p>C++ 与 Python 开发者的技术交流社区 · 分享知识，共同成长</p>
+</section>
+
+<div class="filter-bar">
+  <button class="filter-btn active" data-filter="all">全部</button>
+  <button class="filter-btn" data-filter="C++">C++</button>
+  <button class="filter-btn" data-filter="Python">Python</button>
+  <button class="filter-btn" data-filter="综合">综合</button>
+</div>
+
+<div class="posts-container" id="postsContainer">
+  <div class="empty-state"><div class="big-icon">🔒</div><h3>请先登录</h3><p>填写昵称后即可浏览和发布内容</p></div>
+</div>
+<button class="fab" id="fabBtn">+</button>
+
+<!-- 登录弹窗 -->
+<div class="modal-overlay login-modal" id="loginModalOverlay">
+  <div class="modal-content">
+    <div class="login-logo">Leapad Code</div>
+    <div class="login-subtitle" id="loginSubtitle">请输入你的昵称以进入社区</div>
+    <div class="login-input-wrapper">
+      <span class="input-icon">👤</span>
+      <input type="text" id="loginInput" placeholder="3-20位字母数字下划线" maxlength="20" autocomplete="off">
+    </div>
+    <div class="login-hint">提示：昵称仅允许字母、数字和下划线；留空将自动分配</div>
+    <button class="btn-primary" id="loginBtn">进入社区</button>
+  </div>
+</div>
+
+<!-- 发帖弹窗 -->
+<div class="modal-overlay" id="postModalOverlay">
+  <div class="modal-content">
+    <button class="close-modal" id="closePostModal">&times;</button>
+    <h2>📝 发起讨论</h2>
+    <input type="text" id="postTitle" placeholder="讨论主题" maxlength="80">
+    <select id="postCategory">
+      <option value="C++">C++</option>
+      <option value="Python">Python</option>
+      <option value="综合">综合</option>
+    </select>
+    <textarea id="postContent" placeholder="写下你的想法… 支持 ```cpp 和 ```python 代码块"></textarea>
+    <button class="btn-primary" id="submitPost">发布讨论</button>
+  </div>
+</div>
+
+<!-- 全屏帖子详情弹窗 -->
+<div class="modal-overlay" id="detailModalOverlay">
+  <div class="modal-content" id="detailModal">
+    <div class="detail-head">
+      <button class="close-detail" id="closeDetailBtn">&times;</button>
+      <span class="detail-tag" id="detailTag"></span>
+      <div class="detail-title" id="detailTitle"></div>
+      <div class="detail-meta" id="detailMeta"></div>
+    </div>
+    <div class="detail-body">
+      <div class="detail-content" id="detailContent"></div>
+      <h3 class="comments-title">💬 评论（<span id="detailCommentCount">0</span>）</h3>
+      <div class="comment-list" id="detailCommentList"></div>
+    </div>
+    <div class="detail-reply">
+      <textarea id="detailReplyInput" placeholder="写下你的评论…"></textarea>
+      <button class="btn-primary" id="detailReplyBtn">发表评论</button>
+    </div>
+  </div>
+</div>
+
+<!-- 确认删除弹窗 -->
+<div class="modal-overlay confirm-delete" id="confirmDeleteOverlay">
+  <div class="modal-content">
+    <button class="close-modal" id="closeConfirmDelete">&times;</button>
+    <h2>🗑️ 确认删除</h2>
+    <p>确定要删除这篇帖子吗？此操作不可撤销。</p>
+    <div class="btn-group">
+      <button class="btn-danger" id="confirmDeleteBtn">确认删除</button>
+      <button class="btn-cancel" id="cancelDeleteBtn">取消</button>
+    </div>
+  </div>
+</div>
+
+<!-- 新手教程弹窗 -->
+<div class="modal-overlay" id="tutorialModalOverlay">
+  <div class="modal-content">
+    <button class="close-modal" id="closeTutorialModal">&times;</button>
+    <h2>📖 新手教程</h2>
+    <ul class="tutorial-steps">
+      <li><span class="step-num">1</span><span><strong>浏览帖子</strong> — 滚动页面查看所有讨论</span></li>
+      <li><span class="step-num">2</span><span><strong>分类筛选</strong> — 使用顶部标签切换 C++ / Python / 综合</span></li>
+      <li><span class="step-num">3</span><span><strong>发布讨论</strong> — 点击右下角 + 按钮发帖</span></li>
+      <li><span class="step-num">4</span><span><strong>打开帖子</strong> — 点击「打开帖子」全屏查看内容与评论</span></li>
+      <li><span class="step-num">5</span><span><strong>发表评论</strong> — 在全屏详情页底部输入并发送评论</span></li>
+      <li><span class="step-num">6</span><span><strong>删除帖子</strong> — 只有你自己发的帖子会显示删除按钮</span></li>
+      <li><span class="step-num">7</span><span><strong>修改昵称</strong> — 点击导航栏用户名即可改名</span></li>
+      <li><span class="step-num">8</span><span><strong>主题切换</strong> — 点击 🌙 / ☀️ 切换深色与明亮模式</span></li>
+    </ul>
+    <div class="skip-tutorial-row">
+      <label><input type="checkbox" id="dontShowAgainCheckbox">以后不再显示此教程</label>
+      <button class="btn-primary" id="tutorialGotItBtn" style="width:auto;padding:8px 22px;font-size:.853rem">知道了，开始使用</button>
+    </div>
+  </div>
+</div>
+
+<!-- 修改用户名弹窗 -->
+<div class="modal-overlay" id="renameModalOverlay">
+  <div class="modal-content">
+    <button class="close-modal" id="closeRenameModal">&times;</button>
+    <h2>✏️ 修改昵称</h2>
+    <div class="warning-text">⚠️ 修改后，你之前已发布的帖子作者名不会自动更新</div>
+    <label style="display:block;text-align:left;font-size:.848rem;color:var(--text-secondary);margin-bottom:4px">当前昵称：<strong style="color:var(--accent)" id="currentNameDisplay"></strong></label>
+    <input type="text" id="renameInput" placeholder="输入新昵称（3-20位字母数字下划线）" maxlength="20">
+    <button class="btn-primary" id="confirmRenameBtn">确认修改</button>
+    <button class="btn-secondary" id="cancelRenameBtn">取消</button>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+(function(){
+  'use strict';
+
+  var USERNAME_KEY='leapadcode_username';
+  var POSTS_KEY='leapadcode_posts';
+  var THEME_KEY='leapadcode_theme';
+  var VIEWED_PREFIX='leapadcode_viewed_';
+  var SKIP_TUTORIAL_KEY='leapadcode_skip_tutorial';
+  var USER_COUNTER_KEY='leapadcode_user_counter';
+
+  var DEFAULT_POSTS=[
+    {id:'demo1',title:'C++ 智能指针到底怎么选？',category:'C++',
+     content:'最近在看 C++11 的智能指针，std::unique_ptr、std::shared_ptr、std::weak_ptr 三者使用场景一直有点模糊。\n\n我的理解是：\n1. unique_ptr 用于独占所有权\n2. shared_ptr 用于共享所有权\n3. weak_ptr 用来打破循环引用\n\n请问大家在实际项目中是怎么选择的？有没有什么踩坑经验？',
+     author:'user1',createdAt:new Date(Date.now()-86400000 * 2).toISOString(),views:12,replies:2,
+     comments:[
+       {author:'user2',time:new Date(Date.now()-86400000).toISOString(),content:'简单记：能用 unique_ptr 就用 unique_ptr，需要共享才上 shared_ptr，weak_ptr 基本只在观察者/缓存这种要打破循环的场景用。'},
+       {author:'user3',time:new Date(Date.now()-43200000).toISOString(),content:'补充一点：shared_ptr 有控制块开销，且自定义删除器时最好用 make_shared 避免二次分配。'}
+     ]},
+    {id:'demo2',title:'Python 装饰器通俗解释',category:'Python',
+     content:'很多人学 Python 装饰器会被 @ 语法绕晕，其实本质就一句话：装饰器 = 一个接收函数、返回函数的函数。\n\n```python\ndef log(func):\n    def wrapper(*args,**kwargs):\n        print("调用:",func.__name__)\n        return func(*args,**kwargs)\n    return wrapper\n\n@log\ndef add(a,b):\n    return a+b\n```\n\n@log 等价于 add = log(add)。理解这一点，装饰器就通了。',
+     author:'user4',createdAt:new Date(Date.now()-86400000).toISOString(),views:8,replies:1,
+     comments:[
+       {author:'user5',time:new Date(Date.now()-3600000).toISOString(),content:'讲得清楚！再提一句 functools.wraps 别忘了加，否则被装饰函数的元信息会丢。'}
+     ]},
+    {id:'demo3',title:'新手该怎么规划学习路线？',category:'综合',
+     content:'零基础想转行做开发，纠结是先学 C++ 还是先学 Python。\n\n我的情况：非科班，每天能投入 3 小时左右，目标是一年内能找初级岗位。\n\n有没有过来人能给点建议？两种语言的入门路线差异大吗？',
+     author:'user6',createdAt:new Date(Date.now()-21600000).toISOString(),views:20,replies:0,
+     comments:[]}
+  ];
+
+  var pendingDeleteId=null;
+  var currentDetailId=null;
+  var loggedIn=false;
+
+  function initPosts(){
+    if(!localStorage.getItem(POSTS_KEY)){
+      localStorage.setItem(POSTS_KEY,JSON.stringify(DEFAULT_POSTS));
+    }
+  }
+  function getUsername(){return localStorage.getItem(USERNAME_KEY)}
+  function setUsername(n){localStorage.setItem(USERNAME_KEY,n)}
+  function getPosts(){try{return JSON.parse(localStorage.getItem(POSTS_KEY))||[]}catch(e){return[]}}
+  function savePosts(p){localStorage.setItem(POSTS_KEY,JSON.stringify(p))}
+  function genDefaultName(){
+    var c=parseInt(localStorage.getItem(USER_COUNTER_KEY)||'0');
+    c++;localStorage.setItem(USER_COUNTER_KEY,String(c));
+    return 'user'+c;
+  }
+  function esc(t){var d=document.createElement('div');d.textContent=t;return d.innerHTML}
+  function fmtDate(d){
+    var dt=new Date(d);
+    return dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0')+' '+String(dt.getHours()).padStart(2,'0')+':'+String(dt.getMinutes()).padStart(2,'0');
+  }
+  function toast(msg,type){
+    if(!type)type='info';
+    var el=document.createElement('div');
+    el.className='toast '+type;
+    el.textContent=msg;
+    document.getElementById('toastContainer').appendChild(el);
+    setTimeout(function(){el.style.opacity='0';setTimeout(function(){el.remove()},300)},2700);
+  }
+  function applyTheme(t){
+    if(t==='light'){document.body.classList.add('light');document.getElementById('themeToggle').innerHTML='☀️ 明亮'}
+    else{document.body.classList.remove('light');document.getElementById('themeToggle').innerHTML='🌙 深色'}
+    localStorage.setItem(THEME_KEY,t);
+  }
+  function updateUsernameDisplay(){document.getElementById('currentUsername').textContent=getUsername()||'未设置'}
+
+  function renderPosts(filter){
+    var c=document.getElementById('postsContainer');
+    var posts=getPosts();
+    if(filter&&filter!=='all')posts=posts.filter(function(p){return p.category===filter});
+    posts.sort(function(a,b){return new Date(b.createdAt)-new Date(a.createdAt)});
+
+    if(posts.length===0){
+      c.innerHTML='<div class="empty-state"><div class="big-icon">✨</div><h3>快来发帖子吧！</h3><p>还没有人发布讨论，成为第一个分享者吧</p><button class="start-btn" id="emptyStateBtn">发布第一篇讨论</button></div>';
+      var b=document.getElementById('emptyStateBtn');
+      if(b)b.onclick=function(){document.getElementById('postModalOverlay').classList.add('open')};
+      return;
+    }
+    var html='';
+    var currentUser=getUsername();
+    for(var i=0;i<posts.length;i++){
+      var p=posts[i];
+      var pv=esc(p.content.slice(0,140));
+      if(p.content.length>140)pv+='…';
+      var isOwner=p.author===currentUser;
+      html+='<div class="post-item" data-id="'+p.id+'">'+
+        '<div class="post-header"><span class="tag">'+p.category+'</span><span style="color:var(--text-secondary);font-size:.798rem">'+p.author+'</span><span style="color:var(--text-secondary);font-size:.722rem">'+fmtDate(p.createdAt)+'</span></div>'+
+        '<h4>'+esc(p.title)+'</h4>'+
+        '<div class="preview">'+pv+'</div>'+
+        '<div class="meta"><span>👁️ '+(p.views||0)+'</span><span>💬 '+(p.replies||0)+'</span></div>'+
+        '<div class="post-actions">'+
+        '<button class="open-btn" data-id="'+p.id+'">📂 打开帖子</button>';
+      if(isOwner){html+='<button class="delete-btn" data-id="'+p.id+'">🗑️ 删除</button>'}
+      html+='</div></div>';
+    }
+    c.innerHTML=html;
+    c.querySelectorAll('.open-btn').forEach(function(btn){
+      btn.onclick=function(e){e.stopPropagation();openDetail(btn.dataset.id)};
+    });
+    c.querySelectorAll('.delete-btn').forEach(function(btn){
+      btn.onclick=function(e){e.stopPropagation();pendingDeleteId=btn.dataset.id;document.getElementById('confirmDeleteOverlay').classList.add('open')};
+    });
+  }
+
+  function openDetail(id){
+    var posts=getPosts();var post=null;
+    for(var i=0;i<posts.length;i++){if(posts[i].id===id){post=posts[i];break}}
+    if(!post){toast('帖子不存在','error');return}
+    var username=getUsername();
+    var anonId=localStorage.getItem('anon_id');
+    if(!anonId){anonId='a'+Date.now();localStorage.setItem('anon_id',anonId)}
+    var vid=username||'anon_'+anonId;
+    var vk=VIEWED_PREFIX+id;
+    var arr=JSON.parse(localStorage.getItem(vk)||'[]');
+    if(arr.indexOf(vid)===-1){
+      arr.push(vid);localStorage.setItem(vk,JSON.stringify(arr));
+      post.views=(post.views||0)+1;
+      var all=getPosts();
+      for(var j=0;j<all.length;j++){if(all[j].id===id){all[j].views=post.views;break}}
+      savePosts(all);
+    }
+    currentDetailId=id;
+    document.getElementById('detailTag').textContent=post.category;
+    document.getElementById('detailTitle').textContent=post.title;
+    document.getElementById('detailMeta').innerHTML='👤 '+esc(post.author)+' &nbsp;·&nbsp; 🕐 '+fmtDate(post.createdAt)+' &nbsp;·&nbsp; 👁️ '+(post.views||0)+' &nbsp;·&nbsp; 💬 '+(post.replies||0);
+    document.getElementById('detailContent').textContent=post.content;
+    renderComments(post);
+    document.getElementById('detailModalOverlay').classList.add('open');
+  }
+  function renderComments(post){
+    var list=document.getElementById('detailCommentList');
+    var comments=post.comments||[];
+    document.getElementById('detailCommentCount').textContent=comments.length;
+    if(comments.length===0){list.innerHTML='<div class="comment-item"><div class="c-empty">还没有评论，来抢沙发吧～</div></div>';return}
+    var html='';
+    for(var i=0;i<comments.length;i++){
+      var cm=comments[i];
+      html+='<div class="comment-item"><div class="c-head"><span class="c-author">'+esc(cm.author)+'</span><span class="c-time">'+fmtDate(cm.time)+'</span></div><div class="c-body">'+esc(cm.content)+'</div></div>';
+    }
+    list.innerHTML=html;
+  }
+
+  /* ===== 主题 ===== */
+  applyTheme(localStorage.getItem(THEME_KEY)||'dark');
+  document.getElementById('themeToggle').onclick=function(){
+    applyTheme(document.body.classList.contains('light')?'dark':'light');
+  };
+
+  /* ===== 登录 ===== */
+  var loginOverlay=document.getElementById('loginModalOverlay');
+  var loginInput=document.getElementById('loginInput');
+  var loginSubtitle=document.getElementById('loginSubtitle');
+
+  function showLogin(){
+    var saved=getUsername();
+    if(saved){
+      loginInput.value=saved;
+      loginSubtitle.textContent='欢迎回来，'+saved+' — 可直接确认或修改昵称';
+    }else{
+      loginInput.value='';
+      loginSubtitle.textContent='请输入你的昵称以进入社区（留空自动分配）';
+    }
+    loginOverlay.classList.add('open');
+    setTimeout(function(){loginInput.focus()},100);
+  }
+  function doLogin(){
+    var val=loginInput.value.trim();
+    if(val===''){val=genDefaultName();toast('已为你分配昵称：'+val,'info')}
+    if(!/^[a-zA-Z0-9_]{3,20}$/.test(val)){
+      toast('昵称须为3-20位字母数字下划线','error');loginInput.focus();return;
+    }
+    setUsername(val);
+    updateUsernameDisplay();
+    loginOverlay.classList.remove('open');
+    loggedIn=true;
+    renderPosts(document.querySelector('.filter-btn.active').dataset.filter);
+    if(localStorage.getItem(SKIP_TUTORIAL_KEY)!=='true'){
+      setTimeout(function(){document.getElementById('tutorialModalOverlay').classList.add('open')},350);
+    }
+  }
+  document.getElementById('loginBtn').onclick=doLogin;
+  loginInput.onkeydown=function(e){if(e.key==='Enter')doLogin()};
+  // 允许点击外部 / 按 Esc 关闭登录框，关闭后会重新弹出直到登录成功
+  loginOverlay.addEventListener('click',function(e){
+    if(e.target===loginOverlay)loginOverlay.classList.remove('open');
+  });
+  document.addEventListener('keydown',function(e){
+    if(e.key==='Escape'){
+      var anyOpen=document.querySelector('.modal-overlay.open');
+      if(anyOpen)anyOpen.classList.remove('open');
+    }
+  });
+
+  /* ===== 详情弹窗 ===== */
+  document.getElementById('closeDetailBtn').onclick=function(){
+    document.getElementById('detailModalOverlay').classList.remove('open');
+    currentDetailId=null;
+    renderPosts(document.querySelector('.filter-btn.active').dataset.filter);
+  };
+  document.getElementById('detailModalOverlay').addEventListener('click',function(e){
+    if(e.target===this){this.classList.remove('open');currentDetailId=null;renderPosts(document.querySelector('.filter-btn.active').dataset.filter)}
+  });
+
+  /* ===== 发帖 ===== */
+  document.getElementById('fabBtn').onclick=function(){document.getElementById('postModalOverlay').classList.add('open');document.getElementById('postTitle').focus()};
+  document.getElementById('closePostModal').onclick=function(){document.getElementById('postModalOverlay').classList.remove('open')};
+  document.getElementById('postModalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('open')});
+  document.getElementById('submitPost').onclick=function(){
+    var title=document.getElementById('postTitle').value.trim();
+    var cat=document.getElementById('postCategory').value;
+    var content=document.getElementById('postContent').value.trim();
+    if(!title){toast('请输入讨论主题','error');return}
+    if(!content){toast('请输入讨论内容','error');return}
+    var np={id:'post_'+Date.now(),title:title,category:cat,content:content,author:getUsername(),createdAt:new Date().toISOString(),views:1,replies:0,comments:[]};
+    var posts=getPosts();posts.unshift(np);savePosts(posts);
+    localStorage.setItem(VIEWED_PREFIX+np.id,JSON.stringify([getUsername()]));
+    document.getElementById('postTitle').value='';document.getElementById('postContent').value='';
+    document.getElementById('postModalOverlay').classList.remove('open');
+    renderPosts(document.querySelector('.filter-btn.active').dataset.filter);
+    toast('讨论发布成功 🎉','success');
+  };
+
+  /* ===== 评论 ===== */
+  document.getElementById('detailReplyBtn').onclick=function(){
+    if(!currentDetailId){toast('帖子丢失','error');return}
+    var val=document.getElementById('detailReplyInput').value.trim();
+    if(!val){toast('请输入评论内容','error');return}
+    var posts=getPosts();var post=null;
+    for(var i=0;i<posts.length;i++){if(posts[i].id===currentDetailId){post=posts[i];break}}
+    if(!post){toast('帖子不存在','error');return}
+    post.comments=post.comments||[];
+    post.comments.push({author:getUsername(),time:new Date().toISOString(),content:val});
+    post.replies=post.comments.length;
+    savePosts(posts);
+    document.getElementById('detailReplyInput').value='';
+    renderComments(post);
+    document.getElementById('detailMeta').innerHTML='👤 '+esc(post.author)+' &nbsp;·&nbsp; 🕐 '+fmtDate(post.createdAt)+' &nbsp;·&nbsp; 👁️ '+(post.views||0)+' &nbsp;·&nbsp; 💬 '+(post.replies||0);
+    toast('评论发表成功 💬','success');
+  };
+
+  /* ===== 删除 ===== */
+  document.getElementById('closeConfirmDelete').onclick=function(){document.getElementById('confirmDeleteOverlay').classList.remove('open');pendingDeleteId=null};
+  document.getElementById('cancelDeleteBtn').onclick=function(){document.getElementById('confirmDeleteOverlay').classList.remove('open');pendingDeleteId=null};
+  document.getElementById('confirmDeleteOverlay').addEventListener('click',function(e){if(e.target===this){this.classList.remove('open');pendingDeleteId=null}});
+  document.getElementById('confirmDeleteBtn').onclick=function(){
+    if(!pendingDeleteId){document.getElementById('confirmDeleteOverlay').classList.remove('open');return}
+    var posts=getPosts();var filtered=[];var deleted=false;
+    for(var i=0;i<posts.length;i++){
+      if(posts[i].id===pendingDeleteId){
+        if(posts[i].author!==getUsername()){toast('只能删除自己的帖子','error');document.getElementById('confirmDeleteOverlay').classList.remove('open');pendingDeleteId=null;return}
+        deleted=true;continue;
+      }
+      filtered.push(posts[i]);
+    }
+    if(deleted){savePosts(filtered);toast('帖子已删除 🗑️','success')}else{toast('帖子不存在','error')}
+    document.getElementById('confirmDeleteOverlay').classList.remove('open');
+    pendingDeleteId=null;
+    renderPosts(document.querySelector('.filter-btn.active').dataset.filter);
+  };
+
+  /* ===== 筛选 ===== */
+  document.querySelectorAll('.filter-btn').forEach(function(btn){
+    btn.onclick=function(){
+      document.querySelectorAll('.filter-btn').forEach(function(b){b.classList.remove('active')});
+      btn.classList.add('active');
+      renderPosts(btn.dataset.filter);
+    };
+  });
+
+  /* ===== 教程 ===== */
+  var tutorialOverlay=document.getElementById('tutorialModalOverlay');
+  document.getElementById('manualTutorialBtn').onclick=function(){tutorialOverlay.classList.add('open')};
+  document.getElementById('closeTutorialModal').onclick=function(){tutorialOverlay.classList.remove('open')};
+  tutorialOverlay.addEventListener('click',function(e){if(e.target===this)this.classList.remove('open')});
+  document.getElementById('tutorialGotItBtn').onclick=function(){
+    if(document.getElementById('dontShowAgainCheckbox').checked)localStorage.setItem(SKIP_TUTORIAL_KEY,'true');
+    tutorialOverlay.classList.remove('open');
+  };
+
+  /* ===== 改名 ===== */
+  var renameOverlay=document.getElementById('renameModalOverlay');
+  document.getElementById('userInfo').onclick=function(){
+    document.getElementById('currentNameDisplay').textContent=getUsername();
+    document.getElementById('renameInput').value='';
+    renameOverlay.classList.add('open');
+  };
+  document.getElementById('closeRenameModal').onclick=function(){renameOverlay.classList.remove('open')};
+  document.getElementById('cancelRenameBtn').onclick=function(){renameOverlay.classList.remove('open')};
+  renameOverlay.addEventListener('click',function(e){if(e.target===this)this.classList.remove('open')});
+  document.getElementById('confirmRenameBtn').onclick=function(){
+    var cur=getUsername();var val=document.getElementById('renameInput').value.trim();
+    if(!/^[a-zA-Z0-9_]{3,20}$/.test(val)){toast('昵称须为3-20位字母数字下划线','error');return}
+    if(val===cur){toast('新昵称与当前相同','error');return}
+    setUsername(val);updateUsernameDisplay();renameOverlay.classList.remove('open');
+    toast('昵称修改成功 ✏️','success');
+  };
+
+  /* ===== 启动 ===== */
+  initPosts();
+  showLogin();
+})();
+</script>
+</body>
+</html>
